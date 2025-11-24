@@ -50,7 +50,7 @@ table 4580 "Ext. SharePoint Account"
         }
         field(8; "Client Secret Key"; Guid)
         {
-            Caption = 'Client Secret Key', Locked = true;
+            Caption = 'Client Secret Key';
             Access = Internal;
             DataClassification = SystemMetadata;
         }
@@ -67,14 +67,14 @@ table 4580 "Ext. SharePoint Account"
         }
         field(11; "Certificate Key"; Guid)
         {
-            Caption = 'Certificate Key', Locked = true;
+            Caption = 'Certificate Key';
             Access = Internal;
             AllowInCustomizations = Never;
             DataClassification = SystemMetadata;
         }
         field(12; "Certificate Password Key"; Guid)
         {
-            Caption = 'Certificate Password Key', Locked = true;
+            Caption = 'Certificate Password Key';
             Access = Internal;
             AllowInCustomizations = Never;
             DataClassification = SystemMetadata;
@@ -82,7 +82,7 @@ table 4580 "Ext. SharePoint Account"
         field(13; "Use Graph API"; Boolean)
         {
             Caption = 'Use Microsoft Graph API';
-            ToolTip = 'Specifies whether to use Microsoft Graph API (recommended) or SharePoint REST API for file operations.';
+            ToolTip = 'Specifies whether to use Microsoft Graph API or SharePoint REST API for file operations.';
         }
     }
 
