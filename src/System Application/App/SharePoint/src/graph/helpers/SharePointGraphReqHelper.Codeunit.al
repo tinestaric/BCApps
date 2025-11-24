@@ -24,6 +24,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
         ApiVersion: Enum "Graph API Version";
         CustomBaseUrl: Text;
         MicrosoftGraphDefaultBaseUrlLbl: Label 'https://graph.microsoft.com/%1', Comment = '%1 = Graph API Version', Locked = true;
+        RangeHeaderLbl: Label 'bytes=%1-%2', Locked = true;
 
     /// <summary>
     /// Initializes the Graph Request Helper with an authorization.
@@ -145,6 +146,40 @@ codeunit 9123 "SharePoint Graph Req. Helper"
         FinalEndpoint := PrepareEndpoint(Endpoint, GraphOptionalParameters);
         GraphClient.Get(FinalEndpoint, GraphOptionalParameters, HttpResponseMessage);
         exit(ProcessStreamResponse(HttpResponseMessage, FileInStream));
+    end;
+
+    /// <summary>
+    /// Downloads a chunk of a file using HTTP Range header.
+    /// </summary>
+    /// <param name="Endpoint">The endpoint to request.</param>
+    /// <param name="RangeStart">Starting byte position (0-based, inclusive).</param>
+    /// <param name="RangeEnd">Ending byte position (0-based, inclusive).</param>
+    /// <param name="ChunkInStream">The stream to receive the chunk content.</param>
+    /// <returns>True if the chunk was downloaded successfully; otherwise false.</returns>
+    procedure DownloadChunk(Endpoint: Text; RangeStart: BigInteger; RangeEnd: BigInteger; var ChunkInStream: InStream): Boolean
+    var
+        HttpResponseMessage: Codeunit "Http Response Message";
+        GraphOptionalParameters: Codeunit "Graph Optional Parameters";
+        FinalEndpoint: Text;
+        RangeHeader: Text;
+    begin
+        // Set Range header: "bytes=0-104857599"
+        RangeHeader := StrSubstNo(RangeHeaderLbl, RangeStart, RangeEnd);
+        GraphOptionalParameters.SetRequestHeader(Enum::"Graph Request Header"::Range, RangeHeader);
+
+        FinalEndpoint := PrepareEndpoint(Endpoint, GraphOptionalParameters);
+        GraphClient.Get(FinalEndpoint, GraphOptionalParameters, HttpResponseMessage);
+
+        // Graph API should return 206 Partial Content for Range requests
+        // But we'll accept both 200 (full content) and 206 (partial content)
+        SharePointDiagnostics.SetParameters(HttpResponseMessage.GetIsSuccessStatusCode(),
+            HttpResponseMessage.GetHttpStatusCode(), HttpResponseMessage.GetReasonPhrase(),
+            0, HttpResponseMessage.GetErrorMessage());
+
+        if not HttpResponseMessage.GetIsSuccessStatusCode() then
+            exit(false);
+
+        exit(ProcessStreamResponse(HttpResponseMessage, ChunkInStream));
     end;
 
     #endregion

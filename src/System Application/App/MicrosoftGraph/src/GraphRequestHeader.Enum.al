@@ -43,4 +43,11 @@ enum 9353 "Graph Request Header"
     {
         Caption = 'ConsistencyLevel', Locked = true;
     }
+    /// <summary>
+    /// Range Request Header
+    /// </summary>
+    value(40; Range)
+    {
+        Caption = 'Range', Locked = true;
+    }
 }
