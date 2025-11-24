@@ -1182,9 +1182,9 @@ codeunit 9120 "SharePoint Graph Client Impl."
     /// Downloads a file.
     /// </summary>
     /// <param name="ItemId">ID of the file to download.</param>
-    /// <param name="FileOutStream">OutStream to receive the file content.</param>
+    /// <param name="FileInStream">InStream to receive the file content.</param>
     /// <returns>An operation response object containing the result of the operation.</returns>
-    procedure DownloadFile(ItemId: Text; var FileOutStream: OutStream): Codeunit "SharePoint Graph Response"
+    procedure DownloadFile(ItemId: Text; var FileInStream: InStream): Codeunit "SharePoint Graph Response"
     var
         SharePointGraphResponse: Codeunit "SharePoint Graph Response";
     begin
@@ -1199,8 +1199,8 @@ codeunit 9120 "SharePoint Graph Client Impl."
             exit(SharePointGraphResponse);
         end;
 
-        // Download directly to output stream
-        if not SharePointGraphRequestHelper.DownloadFile(SharePointGraphUriBuilder.GetDriveItemContentByIdEndpoint(ItemId), FileOutStream) then begin
+        // Make the API request
+        if not SharePointGraphRequestHelper.DownloadFile(SharePointGraphUriBuilder.GetDriveItemContentByIdEndpoint(ItemId), FileInStream) then begin
             SharePointGraphResponse.SetError(StrSubstNo(FailedToDownloadFileErr,
                 SharePointGraphRequestHelper.GetDiagnostics().GetResponseReasonPhrase()));
             exit(SharePointGraphResponse);
@@ -1214,9 +1214,9 @@ codeunit 9120 "SharePoint Graph Client Impl."
     /// Downloads a file by path.
     /// </summary>
     /// <param name="FilePath">Path to the file (e.g., 'Documents/file.docx').</param>
-    /// <param name="FileOutStream">OutStream to receive the file content.</param>
+    /// <param name="FileInStream">InStream to receive the file content.</param>
     /// <returns>An operation response object containing the result of the operation.</returns>
-    procedure DownloadFileByPath(FilePath: Text; var FileOutStream: OutStream): Codeunit "SharePoint Graph Response"
+    procedure DownloadFileByPath(FilePath: Text; var FileInStream: InStream): Codeunit "SharePoint Graph Response"
     var
         SharePointGraphResponse: Codeunit "SharePoint Graph Response";
     begin
@@ -1235,8 +1235,8 @@ codeunit 9120 "SharePoint Graph Client Impl."
         if FilePath.StartsWith('/') then
             FilePath := CopyStr(FilePath, 2);
 
-        // Download directly to output stream
-        if not SharePointGraphRequestHelper.DownloadFile(SharePointGraphUriBuilder.GetDriveItemContentByPathEndpoint(FilePath), FileOutStream) then begin
+        // Make the API request
+        if not SharePointGraphRequestHelper.DownloadFile(SharePointGraphUriBuilder.GetDriveItemContentByPathEndpoint(FilePath), FileInStream) then begin
             SharePointGraphResponse.SetError(StrSubstNo(FailedToDownloadFileByPathErr,
                 SharePointGraphRequestHelper.GetDiagnostics().GetResponseReasonPhrase()));
             exit(SharePointGraphResponse);
@@ -1256,8 +1256,6 @@ codeunit 9120 "SharePoint Graph Client Impl."
     var
         GraphDriveItem: Record "SharePoint Graph Drive Item";
         SharePointGraphResponse: Codeunit "SharePoint Graph Response";
-        TempBlob: Codeunit "Temp Blob";
-        ChunkOutStream: OutStream;
         ChunkInStream: InStream;
         FileSize: BigInteger;
         ChunkSize: BigInteger;
@@ -1301,10 +1299,7 @@ codeunit 9120 "SharePoint Graph Client Impl."
             if RangeEnd >= FileSize then
                 RangeEnd := FileSize - 1;
 
-            // Download chunk to TempBlob
-            Clear(TempBlob);
-            TempBlob.CreateOutStream(ChunkOutStream);
-            if not SharePointGraphRequestHelper.DownloadChunk(Endpoint, RangeStart, RangeEnd, ChunkOutStream) then begin
+            if not SharePointGraphRequestHelper.DownloadChunk(Endpoint, RangeStart, RangeEnd, ChunkInStream) then begin
                 SharePointGraphResponse.SetError(StrSubstNo(FailedToDownloadChunkErr,
                     RangeStart, RangeEnd,
                     SharePointGraphRequestHelper.GetDiagnostics().GetResponseReasonPhrase()));
@@ -1312,7 +1307,6 @@ codeunit 9120 "SharePoint Graph Client Impl."
             end;
 
             // Copy chunk to output stream
-            ChunkInStream := TempBlob.CreateInStream();
             CopyStream(FileOutStream, ChunkInStream);
 
             RangeStart := RangeEnd + 1;
@@ -1332,8 +1326,6 @@ codeunit 9120 "SharePoint Graph Client Impl."
     var
         GraphDriveItem: Record "SharePoint Graph Drive Item";
         SharePointGraphResponse: Codeunit "SharePoint Graph Response";
-        TempBlob: Codeunit "Temp Blob";
-        ChunkOutStream: OutStream;
         ChunkInStream: InStream;
         FileSize: BigInteger;
         ChunkSize: BigInteger;
@@ -1380,10 +1372,7 @@ codeunit 9120 "SharePoint Graph Client Impl."
             if RangeEnd >= FileSize then
                 RangeEnd := FileSize - 1;
 
-            // Download chunk to TempBlob
-            Clear(TempBlob);
-            TempBlob.CreateOutStream(ChunkOutStream);
-            if not SharePointGraphRequestHelper.DownloadChunk(Endpoint, RangeStart, RangeEnd, ChunkOutStream) then begin
+            if not SharePointGraphRequestHelper.DownloadChunk(Endpoint, RangeStart, RangeEnd, ChunkInStream) then begin
                 SharePointGraphResponse.SetError(StrSubstNo(FailedToDownloadChunkErr,
                     RangeStart, RangeEnd,
                     SharePointGraphRequestHelper.GetDiagnostics().GetResponseReasonPhrase()));
@@ -1391,7 +1380,6 @@ codeunit 9120 "SharePoint Graph Client Impl."
             end;
 
             // Copy chunk to output stream
-            ChunkInStream := TempBlob.CreateInStream();
             CopyStream(FileOutStream, ChunkInStream);
 
             RangeStart := RangeEnd + 1;

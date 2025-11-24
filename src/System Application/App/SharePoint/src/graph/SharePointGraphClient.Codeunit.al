@@ -482,22 +482,22 @@ codeunit 9119 "SharePoint Graph Client"
     /// Downloads a file.
     /// </summary>
     /// <param name="ItemId">ID of the file to download.</param>
-    /// <param name="FileOutStream">OutStream to receive the file content.</param>
+    /// <param name="FileInStream">InStream to receive the file content.</param>
     /// <returns>An operation response object containing the result of the operation.</returns>
-    procedure DownloadFile(ItemId: Text; var FileOutStream: OutStream): Codeunit "SharePoint Graph Response"
+    procedure DownloadFile(ItemId: Text; var FileInStream: InStream): Codeunit "SharePoint Graph Response"
     begin
-        exit(SharePointGraphClientImpl.DownloadFile(ItemId, FileOutStream));
+        exit(SharePointGraphClientImpl.DownloadFile(ItemId, FileInStream));
     end;
 
     /// <summary>
     /// Downloads a file by path.
     /// </summary>
     /// <param name="FilePath">Path to the file (e.g., 'Documents/file.docx').</param>
-    /// <param name="FileOutStream">OutStream to receive the file content.</param>
+    /// <param name="FileInStream">InStream to receive the file content.</param>
     /// <returns>An operation response object containing the result of the operation.</returns>
-    procedure DownloadFileByPath(FilePath: Text; var FileOutStream: OutStream): Codeunit "SharePoint Graph Response"
+    procedure DownloadFileByPath(FilePath: Text; var FileInStream: InStream): Codeunit "SharePoint Graph Response"
     begin
-        exit(SharePointGraphClientImpl.DownloadFileByPath(FilePath, FileOutStream));
+        exit(SharePointGraphClientImpl.DownloadFileByPath(FilePath, FileInStream));
     end;
 
     /// <summary>

@@ -122,30 +122,30 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// Downloads a file from Microsoft Graph API.
     /// </summary>
     /// <param name="Endpoint">The endpoint to request.</param>
-    /// <param name="FileOutStream">The stream to write the file content to.</param>
+    /// <param name="FileInStream">The stream to write the file content to.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure DownloadFile(Endpoint: Text; var FileOutStream: OutStream): Boolean
+    procedure DownloadFile(Endpoint: Text; var FileInStream: InStream): Boolean
     var
         GraphOptionalParameters: Codeunit "Graph Optional Parameters";
     begin
-        exit(DownloadFile(Endpoint, FileOutStream, GraphOptionalParameters));
+        exit(DownloadFile(Endpoint, FileInStream, GraphOptionalParameters));
     end;
 
     /// <summary>
     /// Downloads a file from Microsoft Graph API with optional parameters.
     /// </summary>
     /// <param name="Endpoint">The endpoint to request.</param>
-    /// <param name="FileOutStream">The stream to write the file content to.</param>
+    /// <param name="FileInStream">The stream to write the file content to.</param>
     /// <param name="GraphOptionalParameters">Optional parameters for the request.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure DownloadFile(Endpoint: Text; var FileOutStream: OutStream; GraphOptionalParameters: Codeunit "Graph Optional Parameters"): Boolean
+    procedure DownloadFile(Endpoint: Text; var FileInStream: InStream; GraphOptionalParameters: Codeunit "Graph Optional Parameters"): Boolean
     var
         HttpResponseMessage: Codeunit "Http Response Message";
         FinalEndpoint: Text;
     begin
         FinalEndpoint := PrepareEndpoint(Endpoint, GraphOptionalParameters);
         GraphClient.Get(FinalEndpoint, GraphOptionalParameters, HttpResponseMessage);
-        exit(ProcessStreamResponse(HttpResponseMessage, FileOutStream));
+        exit(ProcessStreamResponse(HttpResponseMessage, FileInStream));
     end;
 
     /// <summary>
@@ -154,9 +154,9 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="Endpoint">The endpoint to request.</param>
     /// <param name="RangeStart">Starting byte position (0-based, inclusive).</param>
     /// <param name="RangeEnd">Ending byte position (0-based, inclusive).</param>
-    /// <param name="ChunkOutStream">The stream to receive the chunk content.</param>
+    /// <param name="ChunkInStream">The stream to receive the chunk content.</param>
     /// <returns>True if the chunk was downloaded successfully; otherwise false.</returns>
-    procedure DownloadChunk(Endpoint: Text; RangeStart: BigInteger; RangeEnd: BigInteger; var ChunkOutStream: OutStream): Boolean
+    procedure DownloadChunk(Endpoint: Text; RangeStart: BigInteger; RangeEnd: BigInteger; var ChunkInStream: InStream): Boolean
     var
         HttpResponseMessage: Codeunit "Http Response Message";
         GraphOptionalParameters: Codeunit "Graph Optional Parameters";
@@ -179,7 +179,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
         if not HttpResponseMessage.GetIsSuccessStatusCode() then
             exit(false);
 
-        exit(ProcessStreamResponse(HttpResponseMessage, ChunkOutStream));
+        exit(ProcessStreamResponse(HttpResponseMessage, ChunkInStream));
     end;
 
     #endregion
@@ -572,14 +572,15 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// Processes an HTTP response and extracts the stream content.
     /// </summary>
     /// <param name="HttpResponseMessage">The HTTP response message.</param>
-    /// <param name="FileOutStream">The stream to populate with the response content.</param>
+    /// <param name="FileInStream">The stream to populate with the response content.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    local procedure ProcessStreamResponse(HttpResponseMessage: Codeunit "Http Response Message"; FileOutStream: OutStream): Boolean
+    local procedure ProcessStreamResponse(HttpResponseMessage: Codeunit "Http Response Message"; var FileInStream: InStream): Boolean
     begin
         if not ProcessResponse(HttpResponseMessage) then
             exit(false);
 
-        CopyStream(FileOutStream, HttpResponseMessage.GetContent().AsInStream());
+        FileInStream := HttpResponseMessage.GetContent().AsInStream();
+
         exit(true);
     end;
 
