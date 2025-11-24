@@ -231,7 +231,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="FileInStream">The stream containing the file content.</param>
     /// <param name="ResponseJson">The JSON response.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure UploadFile(Endpoint: Text; var FileInStream: InStream; var ResponseJson: JsonObject): Boolean
+    procedure UploadFile(Endpoint: Text; FileInStream: InStream; var ResponseJson: JsonObject): Boolean
     var
         GraphOptionalParameters: Codeunit "Graph Optional Parameters";
     begin
@@ -246,7 +246,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="GraphOptionalParameters">Optional parameters for the request.</param>
     /// <param name="ResponseJson">The JSON response.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure UploadFile(Endpoint: Text; var FileInStream: InStream; GraphOptionalParameters: Codeunit "Graph Optional Parameters"; var ResponseJson: JsonObject): Boolean
+    procedure UploadFile(Endpoint: Text; FileInStream: InStream; GraphOptionalParameters: Codeunit "Graph Optional Parameters"; var ResponseJson: JsonObject): Boolean
     var
         HttpResponseMessage: Codeunit "Http Response Message";
         HttpContent: Codeunit "Http Content";
@@ -393,7 +393,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="AdditionalHeaders">Dictionary of additional headers to include.</param>
     /// <param name="ResponseJson">The JSON response.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure PutContent(Endpoint: Text; var Content: InStream; ContentType: Text; var AdditionalHeaders: Dictionary of [Text, Text]; var ResponseJson: JsonObject): Boolean
+    procedure PutContent(Endpoint: Text; Content: InStream; ContentType: Text; var AdditionalHeaders: Dictionary of [Text, Text]; var ResponseJson: JsonObject): Boolean
     var
         GraphOptionalParameters: Codeunit "Graph Optional Parameters";
     begin
@@ -411,7 +411,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="IsCompleteUrl">If true, the endpoint is treated as a complete URL and not processed further.</param>
     /// <param name="ResponseJson">The JSON response.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure PutContent(Endpoint: Text; var Content: InStream; ContentType: Text; var AdditionalHeaders: Dictionary of [Text, Text]; GraphOptionalParameters: Codeunit "Graph Optional Parameters"; IsCompleteUrl: Boolean; var ResponseJson: JsonObject): Boolean
+    procedure PutContent(Endpoint: Text; Content: InStream; ContentType: Text; var AdditionalHeaders: Dictionary of [Text, Text]; GraphOptionalParameters: Codeunit "Graph Optional Parameters"; IsCompleteUrl: Boolean; var ResponseJson: JsonObject): Boolean
     var
         HttpResponseMessage: Codeunit "Http Response Message";
         HttpContent: Codeunit "Http Content";
@@ -505,27 +505,6 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     end;
 
     #endregion
-
-    #region Pagination
-
-    /// <summary>
-    /// Makes a GET request to the Microsoft Graph API using the full nextLink URL.
-    /// </summary>
-    /// <param name="NextLink">The full nextLink URL to request.</param>
-    /// <param name="ResponseJson">The JSON response.</param>
-    /// <returns>True if the request was successful; otherwise false.</returns>
-    procedure GetNextPage(NextLink: Text; var ResponseJson: JsonObject): Boolean
-    var
-        GraphOptionalParameters: Codeunit "Graph Optional Parameters";
-        HttpResponseMessage: Codeunit "Http Response Message";
-    begin
-        // NextLink is a full URL, so we don't need to add base URL or query parameters
-        GraphClient.Get(NextLink, GraphOptionalParameters, HttpResponseMessage);
-        exit(ProcessJsonResponse(HttpResponseMessage, ResponseJson));
-    end;
-
-    #endregion
-
     #region Helpers
 
     /// <summary>
@@ -595,7 +574,7 @@ codeunit 9123 "SharePoint Graph Req. Helper"
     /// <param name="HttpResponseMessage">The HTTP response message.</param>
     /// <param name="FileOutStream">The stream to populate with the response content.</param>
     /// <returns>True if the request was successful; otherwise false.</returns>
-    local procedure ProcessStreamResponse(HttpResponseMessage: Codeunit "Http Response Message"; var FileOutStream: OutStream): Boolean
+    local procedure ProcessStreamResponse(HttpResponseMessage: Codeunit "Http Response Message"; FileOutStream: OutStream): Boolean
     begin
         if not ProcessResponse(HttpResponseMessage) then
             exit(false);
